@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Availability — Response Form</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f3ef;--surface:#fff;--border:#e4e2da;--border2:#d0cec4;
+    --text:#1a1916;--text2:#6b6860;--text3:#a09e98;
+    --blue:#185FA5;--blue-light:#E6F1FB;--blue-dark:#0C447C;
+    --green:#639922;--green-light:#EAF3DE;--green-dark:#27500A;
+    --red:#A32D2D;--red-light:#FCEBEB;
+    --radius:12px;--radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;padding:2rem 1rem;}
+  .container{max-width:640px;margin:0 auto;}
+  .header{background:var(--blue);border-radius:var(--radius) var(--radius) 0 0;padding:28px 32px;color:white;}
+  .header-badge{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#B5D4F4;margin-bottom:8px;}
+  .header h1{font-size:20px;font-weight:600;line-height:1.3;margin-bottom:6px;}
+  .header p{font-size:13px;color:#B5D4F4;line-height:1.5;}
+  .card{background:var(--surface);border:1px solid var(--border);border-top:none;padding:28px 32px;border-radius:0 0 var(--radius) var(--radius);}
+  .instructor-info{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:24px;display:flex;align-items:center;gap:12px;}
+  .instructor-avatar{width:40px;height:40px;background:var(--blue-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--blue);flex-shrink:0;}
+  .instructor-name{font-weight:600;font-size:14px;}
+  .instructor-meta{font-size:12px;color:var(--text2);margin-top:2px;}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
+  .course-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+  .course-card{border:2px solid var(--border);border-radius:var(--radius-sm);padding:16px;transition:border-color 0.15s,background 0.15s;}
+  .course-card.selected-yes{border-color:var(--green);background:var(--green-light);}
+  .course-card.selected-no{border-color:var(--red);background:var(--red-light);}
+  .course-code{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;background:var(--bg);color:var(--blue);padding:3px 8px;border-radius:4px;border:1px solid var(--border);display:inline-block;margin-bottom:4px;}
+  .course-name{font-weight:600;font-size:14px;color:var(--text);}
+  .course-detail{font-size:12px;color:var(--text2);margin-top:3px;}
+  .radio-group{display:flex;gap:8px;margin-top:12px;}
+  .radio-option{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;user-select:none;}
+  .radio-option input{display:none;}
+  .radio-option.opt-yes:hover{border-color:var(--green);color:var(--green-dark);background:var(--green-light);}
+  .radio-option.opt-no:hover{border-color:var(--red);color:var(--red);background:var(--red-light);}
+  .radio-option.checked-yes{border-color:var(--green);color:var(--green-dark);background:var(--green-light);font-weight:600;}
+  .radio-option.checked-no{border-color:var(--red);color:var(--red);background:var(--red-light);font-weight:600;}
+  .dot{width:8px;height:8px;border-radius:50%;border:2px solid currentColor;display:inline-block;flex-shrink:0;}
+  .radio-option.checked-yes .dot,.radio-option.checked-no .dot{background:currentColor;}
+  .form-group{margin-bottom:20px;}
+  .form-label{display:block;font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px;}
+  .form-label span{color:var(--text3);font-weight:400;}
+  textarea{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--surface);resize:vertical;min-height:80px;transition:border-color 0.15s;outline:none;}
+  textarea:focus{border-color:var(--blue);}
+  textarea::placeholder{color:var(--text3);}
+  .token-row{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:20px;font-size:12px;color:var(--text2);}
+  .token-value{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);font-weight:500;margin-left:auto;}
+  .btn-submit{width:100%;padding:13px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.15s,transform 0.1s;}
+  .btn-submit:hover{background:var(--blue-dark);}
+  .btn-submit:active{transform:scale(0.99);}
+  .btn-submit:disabled{background:var(--text3);cursor:not-allowed;}
+  .error-msg{background:var(--red-light);border:1px solid #f7c1c1;color:var(--red);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;margin-bottom:16px;display:none;}
+  .success-screen{display:none;text-align:center;padding:48px 32px;}
+  .success-icon{width:64px;height:64px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;}
+  .success-screen h2{font-size:20px;font-weight:600;margin-bottom:8px;}
+  .success-screen p{font-size:13px;color:var(--text2);line-height:1.6;}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-screen{text-align:center;padding:48px 32px;}
+  .loading-icon{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+  .invalid-screen{display:none;text-align:center;padding:48px 32px;}
+  .invalid-icon{width:64px;height:64px;background:var(--red-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;}
+  .invalid-screen h2{font-size:18px;font-weight:600;margin-bottom:8px;color:var(--red);}
+  .invalid-screen p{font-size:13px;color:var(--text2);line-height:1.6;}
+  .footer-note{text-align:center;font-size:11px;color:var(--text3);margin-top:20px;line-height:1.5;}
+  @media(max-width:480px){.header,.card{padding:20px;}.radio-group{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-badge">🎓 University Scheduling System</div>
+    <h1>Course Availability Confirmation</h1>
+    <p id="header-term">Please confirm your availability for the upcoming term.</p>
+  </div>
+
+  <div class="card" id="form-card">
+    <!-- Loading -->
+    <div class="loading-screen" id="loading-screen">
+      <div class="loading-icon"></div>
+      <p style="color:var(--text2);font-size:13px">Loading your information...</p>
+    </div>
+    <!-- Invalid -->
+    <div class="invalid-screen" id="invalid-screen">
+      <div class="invalid-icon">🔒</div>
+      <h2>Invalid or Expired Link</h2>
+      <p id="invalid-msg">This response link is invalid or has already been used.<br>Please contact your administrator for a new link.</p>
+    </div>
+    <!-- Success -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✅</div>
+      <h2>Response Submitted!</h2>
+      <p id="success-msg">Thank you. Your availability has been recorded.</p>
+    </div>
+    <!-- Form -->
+    <div id="form-content" style="display:none">
+      <div class="instructor-info">
+        <div class="instructor-avatar" id="instructor-initial">?</div>
+        <div>
+          <div class="instructor-name" id="instructor-name">Loading...</div>
+          <div class="instructor-meta" id="instructor-meta">—</div>
+        </div>
+      </div>
+      <div class="section-label">Your assigned courses — select your availability for each</div>
+      <div class="course-list" id="course-list"></div>
+      <div class="form-group">
+        <label class="form-label" for="comments">Additional comments <span>(optional)</span></label>
+        <textarea id="comments" placeholder="e.g. I prefer morning slots, or I have a scheduling constraint..."></textarea>
+      </div>
+      <div class="token-row">
+        🔒 Secure token: <span class="token-value" id="display-token">—</span>
+      </div>
+      <div class="error-msg" id="error-msg">⚠️ Please select your availability for all courses before submitting.</div>
+      <button class="btn-submit" id="submit-btn" onclick="submitForm()">Submit My Availability →</button>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    This link is unique to you and should not be shared.<br>
+    Sent by the University Scheduling System · Do not reply to the email.
+  </div>
+</div>
+
+<script>
+
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPe_TW8vIBR25JWdJTjYdnTpvRkamA_sf4VG0JxDkMcsTm96o7MRxI8HhwvDcvkgF4/exec';
+
+
+let currentToken      = '';
+let currentInstructor = null;
+let courseSelections  = {};
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+
+  if (!token) { showInvalid('No token in URL. Please use the link from your email.'); return; }
+  currentToken = token;
+  document.getElementById('display-token').textContent = token;
+
+  let instructor = null;
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL + '?action=getInstructor&token=' + encodeURIComponent(token), { mode: 'cors' });
+    const json = await res.json();
+    if (json.success && json.data) instructor = json.data;
+  } catch(e) {
+    console.warn('Could not reach Apps Script:', e);
+  }
+
+  if (!instructor) { showInvalid('This link is invalid or has already been used.'); return; }
+
+  currentInstructor = instructor;
+  loadForm(instructor);
+}
+
+function loadForm(inst) {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('form-content').style.display   = 'block';
+  document.getElementById('header-term').textContent      = 'Confirming availability for ' + inst.term + ' — ' + inst.dept;
+
+  const initials = inst.name.split(' ').map(w=>w[0]).filter((_,i,a)=>i===0||i===a.length-1).join('');
+  document.getElementById('instructor-initial').textContent = initials;
+  document.getElementById('instructor-name').textContent    = inst.name;
+  document.getElementById('instructor-meta').textContent    = inst.dept + ' · ' + inst.email;
+
+  document.getElementById('course-list').innerHTML = inst.courses.map((c,i) => `
+    <div class="course-card" id="course-card-${i}">
+      <div class="course-code">${c.code} · ${c.section}</div>
+      <div class="course-name">${c.name}</div>
+      <div class="course-detail">${c.time} · ${c.room}</div>
+      <div class="radio-group">
+        <label class="radio-option opt-yes" id="opt-yes-${i}" onclick="selectCourse(${i},'yes')">
+          <input type="radio" name="course_${i}" value="yes"><span class="dot"></span> Available
+        </label>
+        <label class="radio-option opt-no" id="opt-no-${i}" onclick="selectCourse(${i},'no')">
+          <input type="radio" name="course_${i}" value="no"><span class="dot"></span> Unavailable
+        </label>
+      </div>
+    </div>`).join('');
+}
+
+function selectCourse(idx, val) {
+  courseSelections[idx] = val;
+  document.getElementById('course-card-'+idx).className = 'course-card '+(val==='yes'?'selected-yes':'selected-no');
+  document.getElementById('opt-yes-'+idx).className = 'radio-option opt-yes'+(val==='yes'?' checked-yes':'');
+  document.getElementById('opt-no-'+idx).className  = 'radio-option opt-no' +(val==='no' ?' checked-no' :'');
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+async function submitForm() {
+  const total  = currentInstructor.courses.length;
+  const filled = Object.keys(courseSelections).length;
+  if (filled < total) {
+    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('error-msg').textContent   = '⚠️ Please select your availability for all ' + total + ' course(s) before submitting.';
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+  const payload = {
+    action:         'submitResponse',
+    token:          currentToken,
+    instructorName: currentInstructor.name,
+    email:          currentInstructor.email,
+    dept:           currentInstructor.dept,
+    term:           currentInstructor.term,
+    timestamp:      new Date().toISOString(),
+    comments:       document.getElementById('comments').value.trim(),
+    courses:        currentInstructor.courses.map((c,i) => ({
+      code:         c.code,
+      name:         c.name,
+      availability: courseSelections[i] || 'no-response'
+    }))
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body:    JSON.stringify(payload)
+    });
+    showSuccess();
+  } catch(e) {
+    btn.disabled  = false;
+    btn.innerHTML = 'Submit My Availability →';
+    document.getElementById('error-msg').textContent   = '⚠️ Submission failed. Please try again.';
+    document.getElementById('error-msg').style.display = 'block';
+  }
+}
+
+function showSuccess() {
+  document.getElementById('form-content').style.display   = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+  document.getElementById('success-msg').textContent      =
+    'Thank you, ' + currentInstructor.name.split(' ')[0] + '. Your availability for ' + currentInstructor.term + ' has been recorded. The scheduling team will be in touch.';
+}
+
+function showInvalid(msg) {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('invalid-screen').style.display = 'block';
+  if (msg) document.getElementById('invalid-msg').textContent = msg;
+}
+
+init();
+</script>
+</body>
+</html>
