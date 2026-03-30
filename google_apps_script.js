@@ -7,7 +7,7 @@ const TERM = "Fall 2025";
 const DEADLINE = "2025-08-15";
 const ADMIN_EMAIL = "khatiwadaanjana55@gmail.com";
 const FORM_BASE_URL =
-  "https://shubhamrajpandey.github.io/instructor-availability/instructor_response_form.html";
+  "https://khatiwadaanjana55-blip.github.io/instructor-availability/instructor_response_form.html";
 
 const TABS = {
   INSTRUCTORS: "Instructors",
