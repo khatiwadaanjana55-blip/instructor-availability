@@ -2,10 +2,10 @@
 // GOOGLE APPS SCRIPT — Instructor Availability System Backend
 // ================================================================
 
-const SHEET_ID = "1kJNEkqOjTeRfYS20qpJz1ZQhOWFOTscSMs4__fXZ39M";
+const SHEET_ID = "1MrnQP3AdckIITQEFT5XKPDV86XKITh-XxfeRX-CTImo";
 const TERM = "Fall 2025";
 const DEADLINE = "2025-08-15";
-const ADMIN_EMAIL = "shubhamrajpandey875@gmail.com";
+const ADMIN_EMAIL = "khatiwadaanjana55@gmail.com";
 const FORM_BASE_URL =
   "https://shubhamrajpandey.github.io/instructor-availability/instructor_response_form.html";
 
