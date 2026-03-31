@@ -194,8 +194,8 @@ function loadForm(inst) {
       <div class="course-detail">${c.time} · ${c.room}</div>
       <div class="course-meta">
         <div class="course-meta-item">🕐 ${c.time && c.time !== 'See schedule' ? c.time.replace(/\bW\b/g,'Wednesday').replace(/\bTh\b/g,'Thursday').replace(/\bT\b/g,'Tuesday').replace(/\bM\b/g,'Monday').replace(/\bF\b/g,'Friday') : 'Wednesday 9:00 a.m. - 12:00 p.m.'}</div>
-        <div class="course-meta-item">📍 ${c.room && c.room !== 'TBD' ? c.room : 'Sault Ste Marie West Wing WW-102'}</div>
-        <div class="course-meta-item">📅 2026-01-07 to 2026-04-07</div>
+        <div class="course-meta-item">📍 ${c.room && c.room !== 'TBD' ? c.room : 'Sault Ste. Marie West Wing'}</div>
+        <div class="course-meta-item">📅 ${c.startDate && c.startDate !== 'TBD' ? c.startDate + ' to ' + c.endDate : '2026-01-07 to 2026-04-07'}</div>
       </div>
       <div class="radio-group">
         <label class="radio-option opt-yes" id="opt-yes-${i}" onclick="selectCourse(${i},'yes')">
