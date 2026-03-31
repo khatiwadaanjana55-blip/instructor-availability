@@ -699,6 +699,14 @@ const html = buildEmailHTML(instForEmail, term, deadline, note, url);
 async function remind(name, email, token) {
   const url  = CONFIG.FORM_BASE_URL + '?token=' + token;
   const term = 'Fall 2025';
+  // ✅ FIX: deduplicate courses
+  const inst = allInstructors.find(i => i.token === token);
+  const courseList = inst ? [...new Set(inst.courses.split(',').map(c=>c.trim()))].filter(c=>c) : [];
+  const courseRows = courseList.map(c => `
+    <div style="border:1px solid #e0e7ff;border-radius:6px;padding:10px 14px;margin-bottom:8px">
+      <div style="font-size:11px;font-weight:700;color:#1A6FA8">${c}</div>
+    </div>`).join('');
+
   try {
     if (!gmailToken) gmailToken = await getGmailToken();
     const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
@@ -708,6 +716,7 @@ async function remind(name, email, token) {
       <div style="background:white;padding:28px;border-radius:0 0 8px 8px;border:1px solid #e0e7ff;border-top:none">
         <p style="font-size:16px;font-weight:600">Dear ${name},</p>
         <p style="color:#6b6860;font-size:14px;line-height:1.6;margin:12px 0">We have not yet received your availability for <strong>${term}</strong>. Please submit as soon as possible.</p>
+        ${courseRows}
         <a href="${url}" style="display:block;text-align:center;background:#1A6FA8;color:white;text-decoration:none;padding:13px;border-radius:6px;font-size:14px;font-weight:600;margin-top:20px">Submit My Availability →</a>
         <p style="margin-top:12px;font-size:12px;text-align:center;color:#6b6860">Or copy: <a href="${url}" style="color:#1A6FA8;word-break:break-all">${url}</a></p>
         <p style="margin-top:16px;font-size:11px;color:#a09e98">University Scheduling System. Do not reply.</p>
