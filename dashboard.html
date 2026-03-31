@@ -406,6 +406,8 @@ updateCanadianClock();
 function toCanadianTime(dateInput) {
   if (!dateInput || dateInput === '—') return '—';
   try {
+    // ✅ If already formatted ET string — return as is
+    if (typeof dateInput === 'string' && dateInput.includes(' ET')) return dateInput;
     const d = new Date(dateInput);
     if (isNaN(d.getTime())) return dateInput;
     return d.toLocaleString('en-CA', {
