@@ -3,7 +3,7 @@
 // ================================================================
 
 const SHEET_ID = "1MrnQP3AdckIITQEFT5XKPDV86XKITh-XxfeRX-CTImo";
-const TERM = "Fall 2025";
+const TERM = "Spring 2026";
 const DEADLINE = "2025-08-15";
 const ADMIN_EMAIL = "khatiwadaanjana55@gmail.com";
 const FORM_BASE_URL =
