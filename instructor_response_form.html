@@ -34,6 +34,9 @@
   .course-code{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;background:var(--bg);color:var(--blue);padding:3px 8px;border-radius:4px;border:1px solid var(--border);display:inline-block;margin-bottom:4px;}
   .course-name{font-weight:600;font-size:14px;color:var(--text);}
   .course-detail{font-size:12px;color:var(--text2);margin-top:3px;}
+  /* ✅ NEW: course meta info row */
+  .course-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .course-meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);background:var(--bg);padding:3px 8px;border-radius:4px;border:1px solid var(--border);}
   .radio-group{display:flex;gap:8px;margin-top:12px;}
   .radio-option{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;user-select:none;}
   .radio-option input{display:none;}
@@ -128,13 +131,12 @@
 </div>
 
 <script>
-
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzx0E3SOlMYdJ0HssAsQuUtlyTivntttPbNzGj6X9HY9JsIUg2LFtW_nC10BD5gk2f1/exec';
-
 
 let currentToken      = '';
 let currentInstructor = null;
 let courseSelections  = {};
+
 async function init() {
   const params = new URLSearchParams(window.location.search);
   const token  = params.get('token');
@@ -154,6 +156,22 @@ async function init() {
 
   if (!instructor) { showInvalid('This link is invalid or has already been used.'); return; }
 
+  // ✅ COURSE LOCK — fetch assigned courses and filter them out
+  try {
+    const lockRes = await fetch(APPS_SCRIPT_URL + '?action=getData', { mode: 'cors' });
+    const lockJson = await lockRes.json();
+    if (lockJson.success && lockJson.assignedCourses && lockJson.assignedCourses.length > 0) {
+      instructor.courses = instructor.courses.filter(c => !lockJson.assignedCourses.includes(c.code));
+    }
+  } catch(e) {
+    console.warn('Could not check assigned courses:', e);
+  }
+
+  if (instructor.courses.length === 0) {
+    showInvalid('All your courses have already been assigned to another instructor. Please contact your administrator.');
+    return;
+  }
+
   currentInstructor = instructor;
   loadForm(instructor);
 }
@@ -168,11 +186,17 @@ function loadForm(inst) {
   document.getElementById('instructor-name').textContent    = inst.name;
   document.getElementById('instructor-meta').textContent    = inst.dept + ' · ' + inst.email;
 
+  // ✅ NEW: Show Location, Date, Time in each course card
   document.getElementById('course-list').innerHTML = inst.courses.map((c,i) => `
     <div class="course-card" id="course-card-${i}">
       <div class="course-code">${c.code} · ${c.section}</div>
       <div class="course-name">${c.name}</div>
       <div class="course-detail">${c.time} · ${c.room}</div>
+      <div class="course-meta">
+        <div class="course-meta-item">🕐 ${c.time && c.time !== 'See schedule' ? c.time : 'W 9:00 a.m. - 12:00 p.m.'}</div>
+        <div class="course-meta-item">📍 ${c.room && c.room !== 'TBD' ? c.room : 'Sault Ste Marie West Wing WW-102'}</div>
+        <div class="course-meta-item">📅 2026-01-07 to 2026-04-07</div>
+      </div>
       <div class="radio-group">
         <label class="radio-option opt-yes" id="opt-yes-${i}" onclick="selectCourse(${i},'yes')">
           <input type="radio" name="course_${i}" value="yes"><span class="dot"></span> Available
