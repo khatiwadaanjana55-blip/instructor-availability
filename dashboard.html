@@ -386,7 +386,7 @@ const CONFIG = {
   FORM_BASE_URL:   'https://khatiwadaanjana55-blip.github.io/instructor-availability/instructor_response_form.html'
 };
 
-let allInstructors=[], allResponses=[], gmailToken=null;
+let allInstructors=[], allResponses=[], allAssignedCourses=[], gmailToken=null;
 
 // ── Canadian Time Clock (Eastern Time) ──────────────────────────
 function updateCanadianClock() {
@@ -430,7 +430,8 @@ async function refreshData() {
     const json = await res.json();
     if (json.success) {
       allInstructors = json.instructors || [];
-      allResponses   = json.responses   || [];
+      allResponses = json.responses || [];
+allAssignedCourses = json.assignedCourses || [];
       updateDashboard();
       renderInstructors(allInstructors);
       renderResponses(allResponses);
@@ -529,8 +530,8 @@ function renderInstructors(list) {
         <td><div class="row-flex"><div class="avatar" style="background:${i.bg||'#DBEAFE'};color:${i.fg||'#1E40AF'}">${i.initials||i.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div><span style="font-weight:500">${i.name}</span></div></td>
         <td style="color:var(--text2)">${i.dept}</td>
         <td style="color:var(--text2);font-size:12px">${i.email}</td>
-        <td>${i.courses}</td>
-        <td>${statusBadge(i.status)}</td>
+        <td>${i.courses.split(',').map(c=>{const locked=allAssignedCourses.includes(c.trim());return locked?`<span style="background:#FEE2E2;color:#7F1D1D;padding:2px 6px;border-radius:4px;font-size:11px;text-decoration:line-through;margin-right:3px">${c.trim()} 🔒</span>`:`<span style="background:#D1FAE5;color:#064E3B;padding:2px 6px;border-radius:4px;font-size:11px;margin-right:3px">${c.trim()}</span>`;}).join('')}</td>
+<td>${statusBadge(i.status)}</td>
         <td><code style="font-family:'DM Mono',monospace;font-size:10px;background:var(--bg);padding:2px 5px;border-radius:3px">${i.token||'—'}</code></td>
         <td style="font-size:12px;color:var(--text3)">${toCanadianTime(i.contact)}</td>
         <td><button class="btn btn-ghost btn-sm" onclick="remind('${i.name}','${i.email}','${i.token||''}')">Remind</button></td>
@@ -659,9 +660,18 @@ async function sendEmails() {
     for (const inst of list) {
       try {
         const instToken = inst.token;
-        if (!instToken) { log(body, `✗ Skipped → ${inst.email}: No token.`, 'log-error'); failed++; continue; }
-        const url  = formUrl + '?token=' + instToken;
-        const html = buildEmailHTML(inst, term, deadline, note, url);
+if (!instToken) { log(body, `✗ Skipped → ${inst.email}: No token.`, 'log-error'); failed++; continue; }
+
+// ✅ COURSE LOCK — remove already assigned courses
+const availableCourses = inst.courses.split(',').map(c=>c.trim()).filter(c=>!allAssignedCourses.includes(c));
+if (availableCourses.length === 0) {
+  log(body, `⚠ Skipped → ${inst.email}: All courses already assigned to another instructor!`, 'log-info');
+  failed++; continue;
+}
+const instForEmail = {...inst, courses: availableCourses.join(', ')};
+
+const url  = formUrl + '?token=' + instToken;
+const html = buildEmailHTML(instForEmail, term, deadline, note, url);
         const raw  = [`To: ${inst.email}`, `Subject: Course availability confirmation - ${term}`, 'MIME-Version: 1.0', 'Content-Type: text/html; charset=UTF-8', '', html].join('\r\n');
         const encoded = btoa(unescape(encodeURIComponent(raw))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
         const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
